@@ -779,3 +779,29 @@ Inventory Feasibility = 100 × clip(weeks_of_cover_post / weeks_of_cover_target,
 | Scoring weights (revenue mode) | `[0.40, 0.20, 0.15, 0.15, 0.05, 0.05]` | §10.3 |
 | Scoring weights (profit mode) | `[0.35, 0.25, 0.15, 0.15, 0.05, 0.05]` | §10.3 |
 | Scorecard composite weights | `[0.40, 0.20, 0.15, 0.10, 0.10, 0.05]` | §11.6 |
+## Implementation alignment note (April 30, 2026)
+
+This file is now aligned to the current implementation, not only the original design intent.
+
+### What is aligned
+- The 5 promotion types are implemented in `backend/screens/step07_promotion_simulation.py`: `%_OFF`, `BUNDLE`, `FIRST_TIME`, `CLEARANCE`, `FREE_SHIPPING`.
+- The main simulation constants in `PROMO_CONSTANTS` match this document's registry.
+- The optimizer, scorecard, assumptions, recommendations, and output payload structure are implemented.
+- The Screen 7 builder sends the richer scenario payload described here instead of the older legacy `offer_*` request shape.
+
+### What is not an exact 1:1 match to the original spec
+- The UI is close to the screenshots but not a perfect pixel-faithful rebuild. The active implementation is the rebuilt `ps10-*` screen.
+- The app prefers `promo_regression_daily_artifacts.pkl`, but due local pandas/pickle compatibility issues it may fall back to `promo_regression_artifacts.pkl` at runtime.
+- `Customer Segment Impact`, `Category Impact`, and `Channel Impact` are implemented as scope-level grouped aggregations using the scenario's overall lift, not fully independent ML re-predictions per displayed row.
+- The original `Value Seekers` shortcut from the mockup/spec is not treated as a hardcoded guaranteed segment anymore. The UI now only suggests a real selectable segment from the loaded options.
+- `Download Report` is implemented as a client-side HTML export, not a backend-generated report pipeline.
+
+### Current UI coupling rules actually implemented
+- If the user selects a category first, the product dropdown is filtered to products in that category.
+- If the user selects a product first, its category is auto-added to the category selection.
+- If categories are narrowed after product selection, products outside those categories are removed from the current selection.
+
+### Conclusion
+- The implementation is substantially aligned with the rules and formulas.
+- It is not exact in every detail of the original screenshot/spec contract.
+- Where implementation and earlier spec diverged, this file should describe the implemented behavior as the source of truth.
